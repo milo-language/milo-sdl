@@ -1,0 +1,92 @@
+// SDL2 GameController bindings.
+//
+// The GameController API sits on top of Joystick and applies SDL's built-in mapping
+// database, so a pad reports A/B/X/Y and a d-pad rather than raw numbered buttons.
+// Most Bluetooth pads are covered; extras load from a gamecontrollerdb.txt.
+//
+// Needs SDL_INIT_GAMECONTROLLER in the SDL_Init flags — see lib.milo.
+
+@link("SDL2")
+@cSig("SDL2/SDL.h", "int SDL_NumJoysticks(void)")
+pub extern fn SDL_NumJoysticks(): i32
+
+// Non-zero if the joystick at this index has a controller mapping. Indices are joystick
+// indices, not the device ids that hotplug events carry.
+//
+// Returns u32, not i32: SDL_bool is an enum whose enumerators are both non-negative, so
+// C gives it an unsigned underlying type. Every hand-written copy of this declaration in
+// our own repos says i32 — @cSig is what caught it. Harmless for a 0/1 result, but the
+// same slip on a function that can return -1 would silently turn failure into a huge
+// positive number.
+@cSig("SDL2/SDL.h", "SDL_bool SDL_IsGameController(int)")
+pub extern fn SDL_IsGameController(index: i32): u32
+
+// Returns 0 if the pad could not be opened.
+@cSig("SDL2/SDL.h", "SDL_GameController *SDL_GameControllerOpen(int)")
+pub extern fn SDL_GameControllerOpen(index: i32): *u8
+
+@cSig("SDL2/SDL.h", "Uint8 SDL_GameControllerGetButton(SDL_GameController *, SDL_GameControllerButton)")
+pub extern fn SDL_GameControllerGetButton(gc: *u8, button: i32): u8
+
+@cSig("SDL2/SDL.h", "void SDL_GameControllerClose(SDL_GameController *)")
+pub extern fn SDL_GameControllerClose(gc: *u8): void
+
+// ── Hotplug events ─────────────────────────────────────────────────────────────────
+//
+// Arrive through SDL_PollEvent like any other event. Watch for these if you want a pad
+// plugged in mid-session to start working without a restart.
+
+@cValue("SDL_CONTROLLERDEVICEADDED", "SDL2/SDL.h")
+pub let SDL_CONTROLLERDEVICEADDED: u32 = 1619
+
+@cValue("SDL_CONTROLLERDEVICEREMOVED", "SDL2/SDL.h")
+pub let SDL_CONTROLLERDEVICEREMOVED: u32 = 1620
+
+// ── Buttons (SDL_GameControllerButton) ─────────────────────────────────────────────
+//
+// Positional names, so PAD_A is the bottom face button wherever the vendor prints "A".
+
+@cValue("SDL_CONTROLLER_BUTTON_A", "SDL2/SDL.h")
+pub let PAD_A: i32 = 0
+
+@cValue("SDL_CONTROLLER_BUTTON_B", "SDL2/SDL.h")
+pub let PAD_B: i32 = 1
+
+@cValue("SDL_CONTROLLER_BUTTON_X", "SDL2/SDL.h")
+pub let PAD_X: i32 = 2
+
+@cValue("SDL_CONTROLLER_BUTTON_Y", "SDL2/SDL.h")
+pub let PAD_Y: i32 = 3
+
+@cValue("SDL_CONTROLLER_BUTTON_BACK", "SDL2/SDL.h")
+pub let PAD_BACK: i32 = 4
+
+@cValue("SDL_CONTROLLER_BUTTON_GUIDE", "SDL2/SDL.h")
+pub let PAD_GUIDE: i32 = 5
+
+@cValue("SDL_CONTROLLER_BUTTON_START", "SDL2/SDL.h")
+pub let PAD_START: i32 = 6
+
+@cValue("SDL_CONTROLLER_BUTTON_LEFTSTICK", "SDL2/SDL.h")
+pub let PAD_LEFTSTICK: i32 = 7
+
+@cValue("SDL_CONTROLLER_BUTTON_RIGHTSTICK", "SDL2/SDL.h")
+pub let PAD_RIGHTSTICK: i32 = 8
+
+@cValue("SDL_CONTROLLER_BUTTON_LEFTSHOULDER", "SDL2/SDL.h")
+pub let PAD_LEFTSHOULDER: i32 = 9
+
+@cValue("SDL_CONTROLLER_BUTTON_RIGHTSHOULDER", "SDL2/SDL.h")
+pub let PAD_RIGHTSHOULDER: i32 = 10
+
+@cValue("SDL_CONTROLLER_BUTTON_DPAD_UP", "SDL2/SDL.h")
+pub let PAD_DPAD_UP: i32 = 11
+
+@cValue("SDL_CONTROLLER_BUTTON_DPAD_DOWN", "SDL2/SDL.h")
+pub let PAD_DPAD_DOWN: i32 = 12
+
+@cValue("SDL_CONTROLLER_BUTTON_DPAD_LEFT", "SDL2/SDL.h")
+pub let PAD_DPAD_LEFT: i32 = 13
+
+@cValue("SDL_CONTROLLER_BUTTON_DPAD_RIGHT", "SDL2/SDL.h")
+pub let PAD_DPAD_RIGHT: i32 = 14

@@ -1,0 +1,93 @@
+// A plasma field, written straight into a Vec<u32> and handed to a streaming texture.
+// The whole SDL surface a software renderer needs: init, window, renderer, texture,
+// one UpdateTexture/Clear/Copy/Present per frame, and an escape key to leave.
+//
+//   milo run examples/plasma.milo
+from "sdl" import {
+    SDL_Init, SDL_Quit, SDL_CreateWindow, SDL_DestroyWindow, SDL_CreateRenderer,
+    SDL_DestroyRenderer, SDL_CreateTexture, SDL_DestroyTexture, SDL_UpdateTexture,
+    SDL_RenderClear, SDL_RenderCopy, SDL_RenderPresent, SDL_PollEvent,
+    SDL_GetKeyboardState, SDL_GetTicks, SDL_Delay,
+    SDL_INIT_VIDEO, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_SHOWN,
+    SDL_TEXTUREACCESS_STREAMING, SDL_PIXELFORMAT_ABGR8888, SDL_QUIT,
+    SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC,
+}
+from "sdl/keys" import {
+    SC_ESCAPE
+}
+from "std/math" import {
+    Math
+}
+
+let W: i64 = 320
+let H: i64 = 240
+let SCALE: i64 = 3
+
+fn main(): i32 {
+    unsafe {
+        if SDL_Init(SDL_INIT_VIDEO) != 0 {
+            print("SDL_Init failed")
+            return 1
+        }
+        let win = SDL_CreateWindow("milo-sdl — plasma", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, (W * SCALE) as i32, (H * SCALE) as i32, SDL_WINDOW_SHOWN)
+        if (win as i64) == 0 {
+            print("no window")
+            SDL_Quit()
+            return 1
+        }
+        let ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
+        let tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, W as i32, H as i32)
+
+        var fb: Vec<u32> = Vec.new()
+        for i in 0..(W * H) {
+            fb.push(0)
+        }
+
+        var ev: [u8; 64] = [0; 64]
+        var running = true
+        while running {
+            let t = (SDL_GetTicks() as f64) / 1000.0
+
+            for y in 0..H {
+                let fy = y as f64
+                for x in 0..W {
+                    let fx = x as f64
+                    let v = Math.sin(fx * 0.03 + t)
+                    + Math.sin(fy * 0.04 - t * 0.7)
+                    + Math.sin((fx + fy) * 0.02 + t * 1.3)
+                    // v is in [-3, 3]; fold it to [0, 1] before scaling to a channel.
+                    let n = (v + 3.0) / 6.0
+                    let r = (n * 255.0) as u32
+                    let g = ((1.0 - n) * 200.0) as u32
+                    let b = (128.0 + 127.0 * Math.sin(v * 2.0)) as u32
+                    // ABGR8888 on a little-endian host: 0xAABBGGRR.
+                    fb[y * W + x] = 0xFF000000 | (b << 16) | (g << 8) | r
+                }
+            }
+
+            SDL_UpdateTexture(tex, 0 as *u8, fb.ptr() as *u8, (W * 4) as i32)
+            SDL_RenderClear(ren)
+            SDL_RenderCopy(ren, tex, 0 as *u8, 0 as *u8)
+            SDL_RenderPresent(ren)
+
+            while SDL_PollEvent(ev) != 0 {
+                let kind: u32 = (ev[0] as u32) | ((ev[1] as u32) << 8)
+                | ((ev[2] as u32) << 16) | ((ev[3] as u32) << 24)
+                if kind == SDL_QUIT {
+                    running = false
+                }
+            }
+            let ks = SDL_GetKeyboardState(0 as *i32)
+            if ks[SC_ESCAPE] != 0 {
+                running = false
+            }
+            SDL_Delay(1)
+        }
+
+        SDL_DestroyTexture(tex)
+        SDL_DestroyRenderer(ren)
+        SDL_DestroyWindow(win)
+        SDL_Quit()
+    }
+    return 0
+}

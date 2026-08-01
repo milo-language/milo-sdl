@@ -1,0 +1,84 @@
+// SDL2 audio bindings — the queue API, not the callback API.
+//
+// Queueing suits generated audio: build PCM buffers and push them at the device. There
+// is no callback thread, so no shared state between it and your frame loop, and nothing
+// here needs a function pointer across the FFI boundary.
+//
+// Two things that cost real debugging time and are not visible in the signatures:
+//
+//   1. SDL_INIT_AUDIO must be in your SDL_Init flags. Without it SDL_OpenAudioDevice
+//      returns 0 rather than failing, so a program with no audio subsystem runs
+//      perfectly and is completely silent.
+//   2. SDL_QueueAudio appends to one stream — it does not mix. Music and effects sharing
+//      a device serialise: an effect waits behind whatever music is already queued
+//      before it is audible. Open a second device and let the OS mixer do the mixing.
+
+@link("SDL2")
+// `desired` and `obtained` are SDL_AudioSpec pointers — see the struct below.
+// Returns 0 on failure, and 0 is also what you get when SDL_INIT_AUDIO was omitted.
+@cSig("SDL2/SDL.h", "SDL_AudioDeviceID SDL_OpenAudioDevice(const char *, int, const SDL_AudioSpec *, SDL_AudioSpec *, int)")
+pub extern fn SDL_OpenAudioDevice(device: *u8, iscapture: i32, desired: *u8, obtained: *u8, allowed: i32): u32
+
+// `len` is bytes, not samples — for i16 PCM that is 2 per sample per channel.
+@cSig("SDL2/SDL.h", "int SDL_QueueAudio(SDL_AudioDeviceID, const void *, Uint32)")
+pub extern fn SDL_QueueAudio(dev: u32, data: *u8, len: u32): i32
+
+// A device opens paused. Nothing plays until this is called with pauseOn = 0.
+@cSig("SDL2/SDL.h", "void SDL_PauseAudioDevice(SDL_AudioDeviceID, int)")
+pub extern fn SDL_PauseAudioDevice(dev: u32, pauseOn: i32): void
+
+@cSig("SDL2/SDL.h", "void SDL_ClearQueuedAudio(SDL_AudioDeviceID)")
+pub extern fn SDL_ClearQueuedAudio(dev: u32): void
+
+// Bytes still queued. Poll this to keep a music loop topped up without unbounded growth.
+@cSig("SDL2/SDL.h", "Uint32 SDL_GetQueuedAudioSize(SDL_AudioDeviceID)")
+pub extern fn SDL_GetQueuedAudioSize(dev: u32): u32
+
+@cSig("SDL2/SDL.h", "void SDL_CloseAudioDevice(SDL_AudioDeviceID)")
+pub extern fn SDL_CloseAudioDevice(dev: u32): void
+
+// ── Sample formats ─────────────────────────────────────────────────────────────────
+
+// Signed 16-bit little-endian — the usual choice for generated PCM.
+@cValue("AUDIO_S16LSB", "SDL2/SDL.h")
+pub let AUDIO_S16LSB: i64 = 32784
+
+@cValue("AUDIO_F32SYS", "SDL2/SDL.h")
+pub let AUDIO_F32SYS: i64 = 33056
+
+// ── SDL_AudioSpec ──────────────────────────────────────────────────────────────────
+//
+// The struct SDL_OpenAudioDevice reads its settings from. Declaring it properly rather
+// than hand-packing a byte buffer means @cLayout checks every offset against the header:
+// a field in the wrong place would open a device at the wrong rate or channel count and
+// produce noise, with nothing to point at.
+//
+// `callback` stays null — that is what selects the queue API. `silence` and `size` are
+// outputs SDL fills in.
+@cLayout("SDL_AudioSpec", "SDL2/SDL.h")
+pub extern struct SDL_AudioSpec {
+    freq: i32,
+    format: u16,
+    channels: u8,
+    silence: u8,
+    samples: u16,
+    padding: u16,
+    size: u32,
+    callback: *u8,
+    userdata: *u8,
+}
+
+// A spec for generated PCM: queue API, no callback, SDL fills the rest.
+pub fn audioSpec(freq: i32, format: u16, channels: u8, samples: u16): SDL_AudioSpec {
+    return SDL_AudioSpec {
+        freq: freq,
+        format: format,
+        channels: channels,
+        silence: 0,
+        samples: samples,
+        padding: 0,
+        size: 0,
+        callback: 0 as *u8,
+        userdata: 0 as *u8,
+    }
+}

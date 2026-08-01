@@ -1,0 +1,10 @@
+{
+  "name": "sdl",
+  "version": "0.1.0",
+  "description": "SDL2 bindings — video, input, gamepad, audio",
+  "license": "MIT",
+  "repository": "github.com/milo-language/milo-sdl",
+  "lib": "lib.milo",
+  "targets": ["darwin", "linux", "windows"],
+  "exclude": ["tests/**", "examples/**"]
+}

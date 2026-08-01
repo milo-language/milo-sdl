@@ -1,0 +1,230 @@
+// USB HID scancodes — what SDL_GetKeyboardState() is indexed by.
+//
+// Physical key positions, not characters: SC_W is the key where W sits on QWERTY,
+// which is where it sits on AZERTY too. That is what you want for movement keys and
+// what you do not want for text entry.
+//
+// Every value is pinned to its SDL enumerator with @cValue, so a transcription error
+// fails the build instead of producing a key that silently never fires.
+
+@cValue("SDL_SCANCODE_A", "SDL2/SDL.h")
+pub let SC_A: i64 = 4
+
+@cValue("SDL_SCANCODE_B", "SDL2/SDL.h")
+pub let SC_B: i64 = 5
+
+@cValue("SDL_SCANCODE_C", "SDL2/SDL.h")
+pub let SC_C: i64 = 6
+
+@cValue("SDL_SCANCODE_D", "SDL2/SDL.h")
+pub let SC_D: i64 = 7
+
+@cValue("SDL_SCANCODE_E", "SDL2/SDL.h")
+pub let SC_E: i64 = 8
+
+@cValue("SDL_SCANCODE_F", "SDL2/SDL.h")
+pub let SC_F: i64 = 9
+
+@cValue("SDL_SCANCODE_G", "SDL2/SDL.h")
+pub let SC_G: i64 = 10
+
+@cValue("SDL_SCANCODE_H", "SDL2/SDL.h")
+pub let SC_H: i64 = 11
+
+@cValue("SDL_SCANCODE_I", "SDL2/SDL.h")
+pub let SC_I: i64 = 12
+
+@cValue("SDL_SCANCODE_J", "SDL2/SDL.h")
+pub let SC_J: i64 = 13
+
+@cValue("SDL_SCANCODE_K", "SDL2/SDL.h")
+pub let SC_K: i64 = 14
+
+@cValue("SDL_SCANCODE_L", "SDL2/SDL.h")
+pub let SC_L: i64 = 15
+
+@cValue("SDL_SCANCODE_M", "SDL2/SDL.h")
+pub let SC_M: i64 = 16
+
+@cValue("SDL_SCANCODE_N", "SDL2/SDL.h")
+pub let SC_N: i64 = 17
+
+@cValue("SDL_SCANCODE_O", "SDL2/SDL.h")
+pub let SC_O: i64 = 18
+
+@cValue("SDL_SCANCODE_P", "SDL2/SDL.h")
+pub let SC_P: i64 = 19
+
+@cValue("SDL_SCANCODE_Q", "SDL2/SDL.h")
+pub let SC_Q: i64 = 20
+
+@cValue("SDL_SCANCODE_R", "SDL2/SDL.h")
+pub let SC_R: i64 = 21
+
+@cValue("SDL_SCANCODE_S", "SDL2/SDL.h")
+pub let SC_S: i64 = 22
+
+@cValue("SDL_SCANCODE_T", "SDL2/SDL.h")
+pub let SC_T: i64 = 23
+
+@cValue("SDL_SCANCODE_U", "SDL2/SDL.h")
+pub let SC_U: i64 = 24
+
+@cValue("SDL_SCANCODE_V", "SDL2/SDL.h")
+pub let SC_V: i64 = 25
+
+@cValue("SDL_SCANCODE_W", "SDL2/SDL.h")
+pub let SC_W: i64 = 26
+
+@cValue("SDL_SCANCODE_X", "SDL2/SDL.h")
+pub let SC_X: i64 = 27
+
+@cValue("SDL_SCANCODE_Y", "SDL2/SDL.h")
+pub let SC_Y: i64 = 28
+
+@cValue("SDL_SCANCODE_Z", "SDL2/SDL.h")
+pub let SC_Z: i64 = 29
+
+@cValue("SDL_SCANCODE_1", "SDL2/SDL.h")
+pub let SC_1: i64 = 30
+
+@cValue("SDL_SCANCODE_2", "SDL2/SDL.h")
+pub let SC_2: i64 = 31
+
+@cValue("SDL_SCANCODE_3", "SDL2/SDL.h")
+pub let SC_3: i64 = 32
+
+@cValue("SDL_SCANCODE_4", "SDL2/SDL.h")
+pub let SC_4: i64 = 33
+
+@cValue("SDL_SCANCODE_5", "SDL2/SDL.h")
+pub let SC_5: i64 = 34
+
+@cValue("SDL_SCANCODE_6", "SDL2/SDL.h")
+pub let SC_6: i64 = 35
+
+@cValue("SDL_SCANCODE_7", "SDL2/SDL.h")
+pub let SC_7: i64 = 36
+
+@cValue("SDL_SCANCODE_8", "SDL2/SDL.h")
+pub let SC_8: i64 = 37
+
+@cValue("SDL_SCANCODE_9", "SDL2/SDL.h")
+pub let SC_9: i64 = 38
+
+@cValue("SDL_SCANCODE_0", "SDL2/SDL.h")
+pub let SC_0: i64 = 39
+
+@cValue("SDL_SCANCODE_RETURN", "SDL2/SDL.h")
+pub let SC_RETURN: i64 = 40
+
+@cValue("SDL_SCANCODE_ESCAPE", "SDL2/SDL.h")
+pub let SC_ESCAPE: i64 = 41
+
+@cValue("SDL_SCANCODE_BACKSPACE", "SDL2/SDL.h")
+pub let SC_BACKSPACE: i64 = 42
+
+@cValue("SDL_SCANCODE_TAB", "SDL2/SDL.h")
+pub let SC_TAB: i64 = 43
+
+@cValue("SDL_SCANCODE_SPACE", "SDL2/SDL.h")
+pub let SC_SPACE: i64 = 44
+
+@cValue("SDL_SCANCODE_MINUS", "SDL2/SDL.h")
+pub let SC_MINUS: i64 = 45
+
+@cValue("SDL_SCANCODE_EQUALS", "SDL2/SDL.h")
+pub let SC_EQUALS: i64 = 46
+
+@cValue("SDL_SCANCODE_LEFTBRACKET", "SDL2/SDL.h")
+pub let SC_LEFTBRACKET: i64 = 47
+
+@cValue("SDL_SCANCODE_RIGHTBRACKET", "SDL2/SDL.h")
+pub let SC_RIGHTBRACKET: i64 = 48
+
+@cValue("SDL_SCANCODE_SEMICOLON", "SDL2/SDL.h")
+pub let SC_SEMICOLON: i64 = 51
+
+@cValue("SDL_SCANCODE_COMMA", "SDL2/SDL.h")
+pub let SC_COMMA: i64 = 54
+
+@cValue("SDL_SCANCODE_PERIOD", "SDL2/SDL.h")
+pub let SC_PERIOD: i64 = 55
+
+@cValue("SDL_SCANCODE_SLASH", "SDL2/SDL.h")
+pub let SC_SLASH: i64 = 56
+
+@cValue("SDL_SCANCODE_GRAVE", "SDL2/SDL.h")
+pub let SC_GRAVE: i64 = 53
+
+@cValue("SDL_SCANCODE_F1", "SDL2/SDL.h")
+pub let SC_F1: i64 = 58
+
+@cValue("SDL_SCANCODE_F2", "SDL2/SDL.h")
+pub let SC_F2: i64 = 59
+
+@cValue("SDL_SCANCODE_F3", "SDL2/SDL.h")
+pub let SC_F3: i64 = 60
+
+@cValue("SDL_SCANCODE_F4", "SDL2/SDL.h")
+pub let SC_F4: i64 = 61
+
+@cValue("SDL_SCANCODE_F5", "SDL2/SDL.h")
+pub let SC_F5: i64 = 62
+
+@cValue("SDL_SCANCODE_F6", "SDL2/SDL.h")
+pub let SC_F6: i64 = 63
+
+@cValue("SDL_SCANCODE_F7", "SDL2/SDL.h")
+pub let SC_F7: i64 = 64
+
+@cValue("SDL_SCANCODE_F8", "SDL2/SDL.h")
+pub let SC_F8: i64 = 65
+
+@cValue("SDL_SCANCODE_F9", "SDL2/SDL.h")
+pub let SC_F9: i64 = 66
+
+@cValue("SDL_SCANCODE_F10", "SDL2/SDL.h")
+pub let SC_F10: i64 = 67
+
+@cValue("SDL_SCANCODE_F11", "SDL2/SDL.h")
+pub let SC_F11: i64 = 68
+
+@cValue("SDL_SCANCODE_F12", "SDL2/SDL.h")
+pub let SC_F12: i64 = 69
+
+@cValue("SDL_SCANCODE_RIGHT", "SDL2/SDL.h")
+pub let SC_RIGHT: i64 = 79
+
+@cValue("SDL_SCANCODE_LEFT", "SDL2/SDL.h")
+pub let SC_LEFT: i64 = 80
+
+@cValue("SDL_SCANCODE_DOWN", "SDL2/SDL.h")
+pub let SC_DOWN: i64 = 81
+
+@cValue("SDL_SCANCODE_UP", "SDL2/SDL.h")
+pub let SC_UP: i64 = 82
+
+@cValue("SDL_SCANCODE_LCTRL", "SDL2/SDL.h")
+pub let SC_LCTRL: i64 = 224
+
+@cValue("SDL_SCANCODE_LSHIFT", "SDL2/SDL.h")
+pub let SC_LSHIFT: i64 = 225
+
+@cValue("SDL_SCANCODE_LALT", "SDL2/SDL.h")
+pub let SC_LALT: i64 = 226
+
+@cValue("SDL_SCANCODE_LGUI", "SDL2/SDL.h")
+pub let SC_LGUI: i64 = 227
+
+@cValue("SDL_SCANCODE_RCTRL", "SDL2/SDL.h")
+pub let SC_RCTRL: i64 = 228
+
+@cValue("SDL_SCANCODE_RSHIFT", "SDL2/SDL.h")
+pub let SC_RSHIFT: i64 = 229
+
+@cValue("SDL_SCANCODE_RALT", "SDL2/SDL.h")
+pub let SC_RALT: i64 = 230
+
+@cValue("SDL_NUM_SCANCODES", "SDL2/SDL.h")
+pub let SC_COUNT: i64 = 512

@@ -1,0 +1,165 @@
+// SDL2 FFI: video, renderer, texture, events, input, timing.
+//
+// Bindings only — no wrappers, no lifecycle types, no opinion about your frame loop.
+// The point is that the extern declarations and the constants exist once, verified,
+// instead of being retyped per project.
+//
+// Every extern carries @cSig and every constant carries @cValue, so the whole surface
+// is checked against the real SDL headers at build time. If SDL's headers are not
+// installed the guards announce that they are skipping — the build still works, since
+// Milo links SDL by name and never needs its headers.
+//
+// Pointers here are `*u8` because Milo has no opaque-handle type in an extern position;
+// SDL_Window*, SDL_Renderer* and SDL_Texture* are all distinct C types, and nothing in
+// Milo stops you passing one where another is wanted. Keep them in named variables.
+
+@link("SDL2")
+@cSig("SDL2/SDL.h", "int SDL_Init(Uint32)")
+pub extern fn SDL_Init(flags: u32): i32
+
+@cSig("SDL2/SDL.h", "void SDL_Quit(void)")
+pub extern fn SDL_Quit(): void
+
+@cSig("SDL2/SDL.h", "SDL_Window *SDL_CreateWindow(const char *, int, int, int, int, Uint32)")
+pub extern fn SDL_CreateWindow(title: *u8, x: i32, y: i32, w: i32, h: i32, flags: u32): *u8
+
+@cSig("SDL2/SDL.h", "void SDL_DestroyWindow(SDL_Window *)")
+pub extern fn SDL_DestroyWindow(win: *u8): void
+
+@cSig("SDL2/SDL.h", "int SDL_SetWindowFullscreen(SDL_Window *, Uint32)")
+pub extern fn SDL_SetWindowFullscreen(win: *u8, flags: u32): i32
+
+@cSig("SDL2/SDL.h", "SDL_Renderer *SDL_CreateRenderer(SDL_Window *, int, Uint32)")
+pub extern fn SDL_CreateRenderer(win: *u8, index: i32, flags: u32): *u8
+
+@cSig("SDL2/SDL.h", "void SDL_DestroyRenderer(SDL_Renderer *)")
+pub extern fn SDL_DestroyRenderer(ren: *u8): void
+
+@cSig("SDL2/SDL.h", "int SDL_RenderSetLogicalSize(SDL_Renderer *, int, int)")
+pub extern fn SDL_RenderSetLogicalSize(ren: *u8, w: i32, h: i32): i32
+
+@cSig("SDL2/SDL.h", "SDL_Texture *SDL_CreateTexture(SDL_Renderer *, Uint32, int, int, int)")
+pub extern fn SDL_CreateTexture(ren: *u8, format: u32, access: i32, w: i32, h: i32): *u8
+
+@cSig("SDL2/SDL.h", "void SDL_DestroyTexture(SDL_Texture *)")
+pub extern fn SDL_DestroyTexture(tex: *u8): void
+
+// `rect` is a `const SDL_Rect *`; pass 0 to mean the whole texture.
+@cSig("SDL2/SDL.h", "int SDL_UpdateTexture(SDL_Texture *, const SDL_Rect *, const void *, int)")
+pub extern fn SDL_UpdateTexture(tex: *u8, rect: *u8, pixels: *u8, pitch: i32): i32
+
+@cSig("SDL2/SDL.h", "int SDL_RenderClear(SDL_Renderer *)")
+pub extern fn SDL_RenderClear(ren: *u8): i32
+
+@cSig("SDL2/SDL.h", "int SDL_RenderCopy(SDL_Renderer *, SDL_Texture *, const SDL_Rect *, const SDL_Rect *)")
+pub extern fn SDL_RenderCopy(ren: *u8, tex: *u8, src: *u8, dst: *u8): i32
+
+@cSig("SDL2/SDL.h", "void SDL_RenderPresent(SDL_Renderer *)")
+pub extern fn SDL_RenderPresent(ren: *u8): void
+
+// Writes one SDL_Event into the buffer. SDL_Event is 56 bytes (SDL pads the union to a
+// fixed size deliberately, so this does not drift), which is why callers declare
+// `[u8; 64]` — over-allocating costs a stack slot and removes the question.
+@cSig("SDL2/SDL.h", "int SDL_PollEvent(SDL_Event *)")
+pub extern fn SDL_PollEvent(event: *u8): i32
+
+// Returns SDL's internal array, valid for the life of the program — index it with an
+// SC_* scancode from keys.milo. Pass 0 for `numkeys` unless you want the length back.
+@cSig("SDL2/SDL.h", "const Uint8 *SDL_GetKeyboardState(int *)")
+pub extern fn SDL_GetKeyboardState(numkeys: *i32): *u8
+
+// Returns the button bitmask; x and y are out-params in window coordinates.
+@cSig("SDL2/SDL.h", "Uint32 SDL_GetMouseState(int *, int *)")
+pub extern fn SDL_GetMouseState(x: *i32, y: *i32): u32
+
+@cSig("SDL2/SDL.h", "int SDL_ShowCursor(int)")
+pub extern fn SDL_ShowCursor(toggle: i32): i32
+
+@cSig("SDL2/SDL.h", "Uint32 SDL_GetTicks(void)")
+pub extern fn SDL_GetTicks(): u32
+
+@cSig("SDL2/SDL.h", "void SDL_Delay(Uint32)")
+pub extern fn SDL_Delay(ms: u32): void
+
+// ── Subsystem flags ────────────────────────────────────────────────────────────────
+//
+// SDL_Init's flags decide which subsystems come up, and a subsystem you did not ask for
+// fails quietly rather than loudly: leaving out SDL_INIT_AUDIO does not error, it makes
+// SDL_OpenAudioDevice return 0, so every play() is a silent no-op and the program runs
+// perfectly while making no sound. Ask for what you will use.
+
+@cValue("SDL_INIT_VIDEO", "SDL2/SDL.h")
+pub let SDL_INIT_VIDEO: u32 = 32
+
+@cValue("SDL_INIT_AUDIO", "SDL2/SDL.h")
+pub let SDL_INIT_AUDIO: u32 = 16
+
+@cValue("SDL_INIT_GAMECONTROLLER", "SDL2/SDL.h")
+pub let SDL_INIT_GAMECONTROLLER: u32 = 8192
+
+@cValue("SDL_INIT_EVENTS", "SDL2/SDL.h")
+pub let SDL_INIT_EVENTS: u32 = 16384
+
+// ── Window ─────────────────────────────────────────────────────────────────────────
+
+@cValue("SDL_WINDOWPOS_CENTERED", "SDL2/SDL.h")
+pub let SDL_WINDOWPOS_CENTERED: i32 = 805240832
+
+@cValue("SDL_WINDOW_SHOWN", "SDL2/SDL.h")
+pub let SDL_WINDOW_SHOWN: u32 = 4
+
+@cValue("SDL_WINDOW_RESIZABLE", "SDL2/SDL.h")
+pub let SDL_WINDOW_RESIZABLE: u32 = 32
+
+@cValue("SDL_WINDOW_FULLSCREEN_DESKTOP", "SDL2/SDL.h")
+pub let SDL_WINDOW_FULLSCREEN_DESKTOP: u32 = 4097
+
+// ── Renderer and texture ───────────────────────────────────────────────────────────
+
+@cValue("SDL_RENDERER_ACCELERATED", "SDL2/SDL.h")
+pub let SDL_RENDERER_ACCELERATED: u32 = 2
+
+@cValue("SDL_RENDERER_PRESENTVSYNC", "SDL2/SDL.h")
+pub let SDL_RENDERER_PRESENTVSYNC: u32 = 4
+
+// STREAMING is the access mode for a texture you rewrite every frame from a Milo-side
+// framebuffer — the shape every emulator, raytracer and software rasteriser here uses.
+@cValue("SDL_TEXTUREACCESS_STREAMING", "SDL2/SDL.h")
+pub let SDL_TEXTUREACCESS_STREAMING: i32 = 1
+
+// ABGR8888 matches a Vec<u32> of 0xAABBGGRR pixels on a little-endian host, so the
+// framebuffer can be written as packed u32 and handed to SDL_UpdateTexture untouched.
+@cValue("SDL_PIXELFORMAT_ABGR8888", "SDL2/SDL.h")
+pub let SDL_PIXELFORMAT_ABGR8888: u32 = 376840196
+
+@cValue("SDL_PIXELFORMAT_ARGB8888", "SDL2/SDL.h")
+pub let SDL_PIXELFORMAT_ARGB8888: u32 = 372645892
+
+// ── Event types ────────────────────────────────────────────────────────────────────
+//
+// The event type is the first 4 bytes of the buffer SDL_PollEvent filled, little-endian.
+
+@cValue("SDL_QUIT", "SDL2/SDL.h")
+pub let SDL_QUIT: u32 = 256
+
+@cValue("SDL_KEYDOWN", "SDL2/SDL.h")
+pub let SDL_KEYDOWN: u32 = 768
+
+@cValue("SDL_KEYUP", "SDL2/SDL.h")
+pub let SDL_KEYUP: u32 = 769
+
+@cValue("SDL_WINDOWEVENT", "SDL2/SDL.h")
+pub let SDL_WINDOWEVENT: u32 = 512
+
+// Window sub-event, at byte offset 12 of an SDL_WINDOWEVENT.
+@cValue("SDL_WINDOWEVENT_FOCUS_GAINED", "SDL2/SDL.h")
+pub let SDL_WINDOWEVENT_FOCUS_GAINED: u32 = 12
+
+@cValue("SDL_WINDOWEVENT_FOCUS_LOST", "SDL2/SDL.h")
+pub let SDL_WINDOWEVENT_FOCUS_LOST: u32 = 13
+
+@cValue("SDL_WINDOWEVENT_MINIMIZED", "SDL2/SDL.h")
+pub let SDL_WINDOWEVENT_MINIMIZED: u32 = 7
+
+@cValue("SDL_WINDOWEVENT_RESTORED", "SDL2/SDL.h")
+pub let SDL_WINDOWEVENT_RESTORED: u32 = 9
