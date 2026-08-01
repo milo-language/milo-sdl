@@ -81,7 +81,7 @@ warning: @cLayout/@cSig/@cValue guards skipped — 'SDL2/SDL.h' is not installed
 so there is no header to check these declarations against
 ```
 
-Requires Milo 0.9.0 or newer for `@cValue`.
+Requires Milo 0.1.0 or newer for `@cValue`.
 
 ## Installing SDL2
 
