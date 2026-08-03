@@ -129,6 +129,11 @@ pub let SDL_WINDOW_SHOWN: u32 = 4
 @cValue("SDL_WINDOW_RESIZABLE", "SDL2/SDL.h")
 pub let SDL_WINDOW_RESIZABLE: u32 = 32
 
+// Created but never mapped. The flag a headless capture wants: a real window with
+// a real context, and nothing on screen while it renders.
+@cValue("SDL_WINDOW_HIDDEN", "SDL2/SDL.h")
+pub let SDL_WINDOW_HIDDEN: u32 = 8
+
 @cValue("SDL_WINDOW_FULLSCREEN_DESKTOP", "SDL2/SDL.h")
 pub let SDL_WINDOW_FULLSCREEN_DESKTOP: u32 = 4097
 

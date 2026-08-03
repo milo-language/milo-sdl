@@ -5,7 +5,7 @@ and audio.
 
 ```bash
 milo add github.com/milo-language/milo-sdl            # latest release
-milo add github.com/milo-language/milo-sdl@v0.3.0     # or pin a tag
+milo add github.com/milo-language/milo-sdl@v0.3.1     # or pin a tag
 ```
 
 ```milo
