@@ -1,8 +1,11 @@
 // SDL2's OpenGL context: attributes, context creation, buffer swap.
 //
-// SDL is how you get a GL context; it is not how you draw. Nothing here is an OpenGL
-// call — for those, use a GL binding (github.com/milo-language/gl). This file is the
-// four-line airlock between a window and a renderer.
+// Every declaration in this file is an `SDL_*` function. There is not one OpenGL call
+// here — for those you want a GL binding such as github.com/milo-language/milo-gl. The
+// module is named `glcontext` rather than `gl` for exactly that reason: creating a
+// context is the WINDOW SYSTEM's job, and SDL, GLFW, Cocoa and Win32 each do it their
+// own way, while the GL API itself knows nothing about windows. This file is the
+// four-line airlock between the two.
 //
 // The ordering is the part that costs people an afternoon, so it is written down:
 //

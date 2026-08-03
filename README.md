@@ -5,7 +5,7 @@ and audio.
 
 ```bash
 milo add github.com/milo-language/milo-sdl            # latest release
-milo add github.com/milo-language/milo-sdl@v0.2.0     # or pin a tag
+milo add github.com/milo-language/milo-sdl@v0.3.0     # or pin a tag
 ```
 
 ```milo
@@ -53,20 +53,20 @@ was retyping.
 | Import | Contents |
 |---|---|
 | `"sdl"` | init/quit, window, renderer, texture, events, keyboard, mouse, timing |
-| `"sdl/gl"` | OpenGL context: attributes, creation, drawable size, buffer swap |
+| `"sdl/glcontext"` | OpenGL context: attributes, creation, drawable size, buffer swap |
 | `"sdl/keys"` | USB HID scancodes — what `SDL_GetKeyboardState` is indexed by |
 | `"sdl/gamepad"` | GameController API, buttons, hotplug events |
 | `"sdl/audio"` | queue-API audio device and `SDL_AudioSpec` |
 
 ## Getting an OpenGL context
 
-`"sdl/gl"` is how you get a context, not how you draw — for the drawing, use a GL
-binding such as [`gl`](https://github.com/milo-language/gl). The order matters and is
+`"sdl/glcontext"` is how you get a context, not how you draw — for the drawing, use a GL
+binding such as [`gl`](https://github.com/milo-language/milo-gl). The order matters and is
 the part that costs people an afternoon:
 
 ```milo
 from "sdl" import { SDL_CreateWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_SHOWN }
-from "sdl/gl" import {
+from "sdl/glcontext" import {
     SDL_GL_CreateContext, SDL_GL_SetAttribute, SDL_GL_SetSwapInterval,
     SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
     SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK, SDL_WINDOW_OPENGL,
