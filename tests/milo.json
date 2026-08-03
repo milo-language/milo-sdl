@@ -1,5 +1,7 @@
 {
   "name": "sdl-tests",
   "version": "0.0.0",
-  "deps": { "sdl": "../" }
+  "deps": {
+    "sdl": "../"
+  }
 }

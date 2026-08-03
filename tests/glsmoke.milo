@@ -1,0 +1,81 @@
+// Compile-and-run check of the GL surface: asks for a 3.3 core context, opens a window
+// that can carry one, creates the context, reads the drawable size and swaps a frame.
+//
+// Separate from smoke.milo because a window cannot be both — SDL_CreateRenderer on a GL
+// window takes the context over, so the two paths cannot share one.
+//
+// No OpenGL calls here on purpose: this package's job ends at handing you a live
+// context, and depending on a GL binding to test that would be testing the wrong thing.
+from "sdl" import {
+    SDL_Init, SDL_Quit, SDL_CreateWindow, SDL_DestroyWindow, SDL_GetError,
+    SDL_GetWindowSize, SDL_MaximizeWindow,
+    SDL_INIT_VIDEO, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_SHOWN, SDL_WINDOW_RESIZABLE,
+    SDL_WINDOW_ALLOW_HIGHDPI,
+}
+from "sdl/gl" import {
+    SDL_GL_CreateContext, SDL_GL_DeleteContext, SDL_GL_GetDrawableSize,
+    SDL_GL_SetAttribute, SDL_GL_SetSwapInterval, SDL_GL_SwapWindow,
+    SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
+    SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_DEPTH_SIZE,
+    SDL_GL_DOUBLEBUFFER, SDL_WINDOW_OPENGL,
+}
+
+let W: i64 = 320
+let H: i64 = 240
+
+fn main(): i32 {
+    unsafe {
+        if SDL_Init(SDL_INIT_VIDEO) != 0 {
+            print("no video subsystem — skipping")
+            print("ok")
+            return 0
+        }
+
+        // Before the window, not after: SDL reads these when it picks the pixel format.
+        let _ = SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)
+        let _ = SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3)
+        let _ = SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE)
+        let _ = SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1)
+        let _ = SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24)
+
+        let flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI
+        let win = SDL_CreateWindow("glsmoke", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W as i32, H as i32, flags)
+        if (win as i64) == 0 {
+            // Headless CI has no video device. The build-time guards already checked
+            // every declaration, so this is a skip, not a failure.
+            print("no video device — skipping GL checks: " + _cstrToString(SDL_GetError()))
+            print("ok")
+            SDL_Quit()
+            return 0
+        }
+
+        let ctx = SDL_GL_CreateContext(win)
+        if (ctx as i64) == 0 {
+            print("no GL 3.3 core context: " + _cstrToString(SDL_GetError()))
+            SDL_DestroyWindow(win)
+            SDL_Quit()
+            return 1
+        }
+        let _ = SDL_GL_SetSwapInterval(1)
+
+        // The drawable is the window on a 1x display and twice it on a Retina one, so
+        // the only thing that holds everywhere is that it is at least the window size.
+        var ww: i32 = 0
+        var wh: i32 = 0
+        SDL_GetWindowSize(win, ww.addrOf(), wh.addrOf())
+        var dw: i32 = 0
+        var dh: i32 = 0
+        SDL_GL_GetDrawableSize(win, dw.addrOf(), dh.addrOf())
+        print(ww > 0 && wh > 0)
+        print(dw >= ww && dh >= wh)
+
+        SDL_MaximizeWindow(win)
+        SDL_GL_SwapWindow(win)
+
+        SDL_GL_DeleteContext(ctx)
+        SDL_DestroyWindow(win)
+        SDL_Quit()
+        print("ok")
+    }
+    return 0
+}

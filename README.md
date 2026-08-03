@@ -5,7 +5,7 @@ and audio.
 
 ```bash
 milo add github.com/milo-language/milo-sdl            # latest release
-milo add github.com/milo-language/milo-sdl@v0.1.0     # or pin a tag
+milo add github.com/milo-language/milo-sdl@v0.2.0     # or pin a tag
 ```
 
 ```milo
@@ -53,9 +53,44 @@ was retyping.
 | Import | Contents |
 |---|---|
 | `"sdl"` | init/quit, window, renderer, texture, events, keyboard, mouse, timing |
+| `"sdl/gl"` | OpenGL context: attributes, creation, drawable size, buffer swap |
 | `"sdl/keys"` | USB HID scancodes — what `SDL_GetKeyboardState` is indexed by |
 | `"sdl/gamepad"` | GameController API, buttons, hotplug events |
 | `"sdl/audio"` | queue-API audio device and `SDL_AudioSpec` |
+
+## Getting an OpenGL context
+
+`"sdl/gl"` is how you get a context, not how you draw — for the drawing, use a GL
+binding such as [`gl`](https://github.com/milo-language/gl). The order matters and is
+the part that costs people an afternoon:
+
+```milo
+from "sdl" import { SDL_CreateWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_SHOWN }
+from "sdl/gl" import {
+    SDL_GL_CreateContext, SDL_GL_SetAttribute, SDL_GL_SetSwapInterval,
+    SDL_GL_CONTEXT_MAJOR_VERSION, SDL_GL_CONTEXT_MINOR_VERSION,
+    SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_MASK, SDL_WINDOW_OPENGL,
+}
+
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)      // 1. before the window
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3)
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE)
+let win = SDL_CreateWindow(title.cstr(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                           w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL)   // 2. the flag
+let ctx = SDL_GL_CreateContext(win)                                      // 3.
+SDL_GL_SetSwapInterval(1)                                                // 4.
+```
+
+SDL reads the attributes when it picks the window's pixel format and ignores them
+afterwards. Set them *after* the window exists and they are accepted, return 0, and
+change nothing — you ask for 3.3 core, silently get whatever the driver felt like, and
+find out much later from a shader compile error that does not mention the version.
+
+Two more that are invisible in the signatures. **A window cannot be both**: calling
+`SDL_CreateRenderer` on a GL window takes the context over, so pick one before the
+window exists. And **`SDL_GL_GetDrawableSize` is not `SDL_GetWindowSize`** — on a Retina
+display the drawable is twice the window in each axis, and setting the viewport from the
+wrong one renders the frame into a quarter of the window.
 
 ## Everything is checked against the real headers
 

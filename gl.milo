@@ -1,0 +1,97 @@
+// SDL2's OpenGL context: attributes, context creation, buffer swap.
+//
+// SDL is how you get a GL context; it is not how you draw. Nothing here is an OpenGL
+// call — for those, use a GL binding (github.com/milo-language/gl). This file is the
+// four-line airlock between a window and a renderer.
+//
+// The ordering is the part that costs people an afternoon, so it is written down:
+//
+//   1. SDL_GL_SetAttribute for every attribute you care about
+//   2. SDL_CreateWindow with SDL_WINDOW_OPENGL in the flags
+//   3. SDL_GL_CreateContext
+//   4. SDL_GL_SetSwapInterval
+//
+// SDL reads the attributes when it chooses the window's pixel format and ignores them
+// afterwards, so step 1 must come before step 2. Set them after the window exists and
+// they are accepted, return 0, and change nothing: you ask for 3.3 core and silently
+// get whatever compatibility context the driver felt like, which then fails much later
+// in a shader compile with an error that does not mention the version.
+//
+// A window cannot be both GL and SDL_Renderer. SDL_CreateRenderer on a GL window takes
+// the context over, so the choice is made once, before the window exists.
+
+@link("SDL2")
+// Returns 0 on success, negative on failure. Worth checking: a driver that cannot give
+// you the profile you asked for says so here, and the alternative is finding out from
+// a shader.
+@cSig("SDL2/SDL.h", "int SDL_GL_SetAttribute(SDL_GLattr, int)")
+pub extern fn SDL_GL_SetAttribute(attr: i32, value: i32): i32
+
+// 0 on failure — ask SDL_GetError for the reason. The window must already carry
+// SDL_WINDOW_OPENGL.
+@cSig("SDL2/SDL.h", "SDL_GLContext SDL_GL_CreateContext(SDL_Window *)")
+pub extern fn SDL_GL_CreateContext(win: *u8): *u8
+
+@cSig("SDL2/SDL.h", "void SDL_GL_DeleteContext(SDL_GLContext)")
+pub extern fn SDL_GL_DeleteContext(ctx: *u8): void
+
+// Present the back buffer. This is the end of every GL frame.
+@cSig("SDL2/SDL.h", "void SDL_GL_SwapWindow(SDL_Window *)")
+pub extern fn SDL_GL_SwapWindow(win: *u8): void
+
+// 0 for no vsync, 1 for vsync, -1 for adaptive. Returns negative when the interval is
+// unsupported — adaptive in particular is not always available, so ask for 1 unless you
+// are prepared to fall back.
+@cSig("SDL2/SDL.h", "int SDL_GL_SetSwapInterval(int)")
+pub extern fn SDL_GL_SetSwapInterval(interval: i32): i32
+
+// The drawable size in PIXELS, which on a HiDPI display is not the window size in
+// points — on a Retina Mac it is twice it in each axis. This is the number glViewport
+// wants. Setting the viewport from SDL_GetWindowSize instead renders the frame into
+// the bottom-left quarter of the window, which reads as a broken projection rather
+// than a units mistake.
+@cSig("SDL2/SDL.h", "void SDL_GL_GetDrawableSize(SDL_Window *, int *, int *)")
+pub extern fn SDL_GL_GetDrawableSize(win: *u8, w: *i32, h: *i32): void
+
+// ── window flag ────────────────────────────────────────────────────────────────────
+
+// Must be in the SDL_CreateWindow flags, or SDL_GL_CreateContext fails on that window.
+@cValue("SDL_WINDOW_OPENGL", "SDL2/SDL.h")
+pub let SDL_WINDOW_OPENGL: u32 = 2
+
+// ── attributes for SDL_GL_SetAttribute ─────────────────────────────────────────────
+//
+// These are SDL_GLattr enumerators — indices into SDL's attribute table, not GL
+// constants, and there is nothing about the numbers to recognise. @cValue is what keeps
+// a transcription slip from becoming a silently-ignored attribute.
+
+@cValue("SDL_GL_CONTEXT_MAJOR_VERSION", "SDL2/SDL.h")
+pub let SDL_GL_CONTEXT_MAJOR_VERSION: i32 = 17
+
+@cValue("SDL_GL_CONTEXT_MINOR_VERSION", "SDL2/SDL.h")
+pub let SDL_GL_CONTEXT_MINOR_VERSION: i32 = 18
+
+@cValue("SDL_GL_CONTEXT_PROFILE_MASK", "SDL2/SDL.h")
+pub let SDL_GL_CONTEXT_PROFILE_MASK: i32 = 21
+
+@cValue("SDL_GL_DOUBLEBUFFER", "SDL2/SDL.h")
+pub let SDL_GL_DOUBLEBUFFER: i32 = 5
+
+// Bits of depth buffer on the WINDOW's framebuffer. A renderer that draws its depth
+// into its own framebuffer object does not need this; one that depth-tests against the
+// default framebuffer does, and gets 0 by default on some drivers.
+@cValue("SDL_GL_DEPTH_SIZE", "SDL2/SDL.h")
+pub let SDL_GL_DEPTH_SIZE: i32 = 6
+
+@cValue("SDL_GL_MULTISAMPLEBUFFERS", "SDL2/SDL.h")
+pub let SDL_GL_MULTISAMPLEBUFFERS: i32 = 13
+
+@cValue("SDL_GL_MULTISAMPLESAMPLES", "SDL2/SDL.h")
+pub let SDL_GL_MULTISAMPLESAMPLES: i32 = 14
+
+// ── value for SDL_GL_CONTEXT_PROFILE_MASK ──────────────────────────────────────────
+
+// Core, not compatibility. On macOS this is the only way past GL 2.1: ask for core and
+// you get 4.1, ask for nothing and you get 2.1 with none of the 3.3 shader surface.
+@cValue("SDL_GL_CONTEXT_PROFILE_CORE", "SDL2/SDL.h")
+pub let SDL_GL_CONTEXT_PROFILE_CORE: i32 = 1
