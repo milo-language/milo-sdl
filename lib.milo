@@ -93,6 +93,19 @@ pub extern fn SDL_GetMouseState(x: *i32, y: *i32): u32
 @cSig("SDL2/SDL.h", "int SDL_ShowCursor(int)")
 pub extern fn SDL_ShowCursor(toggle: i32): i32
 
+// Relative mode hides the cursor, keeps it in the window, and reports only motion
+// deltas — the difference between a camera you can turn forever and one that stops
+// when the pointer hits the edge of the screen. The parameter is SDL_bool, an enum
+// whose enumerators are both non-negative, so C gives it an unsigned type.
+@cSig("SDL2/SDL.h", "int SDL_SetRelativeMouseMode(SDL_bool)")
+pub extern fn SDL_SetRelativeMouseMode(enabled: u32): i32
+
+// The delta since the last call to THIS function — it has its own accumulator, so
+// mixing it with SDL_GetMouseState is fine but calling it twice a frame is not: the
+// second call reports zero.
+@cSig("SDL2/SDL.h", "Uint32 SDL_GetRelativeMouseState(int *, int *)")
+pub extern fn SDL_GetRelativeMouseState(x: *i32, y: *i32): u32
+
 @cSig("SDL2/SDL.h", "Uint32 SDL_GetTicks(void)")
 pub extern fn SDL_GetTicks(): u32
 
@@ -172,6 +185,12 @@ pub let SDL_PIXELFORMAT_ARGB8888: u32 = 372645892
 @cValue("SDL_BUTTON_LMASK", "SDL2/SDL.h")
 pub let SDL_BUTTON_LMASK: u32 = 1
 
+@cValue("SDL_BUTTON_MMASK", "SDL2/SDL.h")
+pub let SDL_BUTTON_MMASK: u32 = 2
+
+@cValue("SDL_BUTTON_RMASK", "SDL2/SDL.h")
+pub let SDL_BUTTON_RMASK: u32 = 4
+
 // ── Event types ────────────────────────────────────────────────────────────────────
 //
 // The event type is the first 4 bytes of the buffer SDL_PollEvent filled, little-endian.
@@ -191,6 +210,15 @@ pub let SDL_WINDOWEVENT: u32 = 512
 // The wheel delta is an Sint32 at byte offset 16 (x) and 20 (y) of the event buffer.
 // There is no polled equivalent — a wheel has no state to ask for, only events, so a
 // program that never reads events never sees the wheel at all.
+@cValue("SDL_MOUSEMOTION", "SDL2/SDL.h")
+pub let SDL_MOUSEMOTION: u32 = 1024
+
+@cValue("SDL_MOUSEBUTTONDOWN", "SDL2/SDL.h")
+pub let SDL_MOUSEBUTTONDOWN: u32 = 1025
+
+@cValue("SDL_MOUSEBUTTONUP", "SDL2/SDL.h")
+pub let SDL_MOUSEBUTTONUP: u32 = 1026
+
 @cValue("SDL_MOUSEWHEEL", "SDL2/SDL.h")
 pub let SDL_MOUSEWHEEL: u32 = 1027
 
