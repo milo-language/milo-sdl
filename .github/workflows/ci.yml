@@ -1,0 +1,62 @@
+name: ci
+
+# Nothing gated this package until now, and the two repos that also went ungated
+# (dapweb, milo-emulators) both sat uncompilable for three weeks against a released
+# compiler before anyone noticed. The bindings are the part that rots: a stdlib rename
+# or an ABI/@cSig change breaks them without a single line of this repo changing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # llvmpipe: the runner has no GPU, and SDL still needs a real GL implementation
+      # to hand back a 3.3 core context.
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SDL2 and a software GL stack
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev xvfb libgl1-mesa-dri libglx-mesa0
+
+      - name: Install milo
+        run: |
+          mkdir -p "$HOME/.milo-bin"
+          curl -fsSL https://github.com/milo-language/milo/releases/download/latest/milo-linux-x64.tar.gz \
+            | tar xz -C "$HOME/.milo-bin" --strip-components=1   # archive wraps the binary in milo-<platform>/
+          chmod +x "$HOME/.milo-bin/milo"
+          echo "$HOME/.milo-bin" >> "$GITHUB_PATH"
+
+      # The @cSig/@cValue guards run here: a declaration that disagrees with the
+      # installed SDL headers fails the compile rather than the link.
+      - name: Library compiles
+        run: milo check lib.milo
+
+      # Both smoke tests degrade to "skipping" when there is no video device, which is
+      # the right behaviour for a dev box and the wrong result for a gate. Under xvfb
+      # a skip means the display never came up, so treat it as a failure.
+      - name: FFI smoke test
+        working-directory: tests
+        run: |
+          out=$(xvfb-run -a -s "-screen 0 1280x1024x24" milo run smoke.milo)
+          printf '%s\n' "$out"
+          case "$out" in *skipping*) echo "no video device under xvfb: the window path never ran"; exit 1;; esac
+
+      - name: GL context smoke test
+        working-directory: tests
+        run: |
+          out=$(xvfb-run -a -s "-screen 0 1280x1024x24" milo run glsmoke.milo)
+          printf '%s\n' "$out"
+          case "$out" in *skipping*) echo "no GL context under xvfb: the context path never ran"; exit 1;; esac
+
+      # The example runs an interactive loop, so it is compiled, not run.
+      - name: Example compiles
+        working-directory: examples
+        run: milo check plasma.milo
