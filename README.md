@@ -24,8 +24,8 @@ The C-header guards, and the gotchas that are invisible in the signatures:
 brew install sdl2                 # macOS
 apt install libsdl2-dev           # Debian/Ubuntu
 
-milo add github.com/milo-language/milo-sdl            # latest release
-milo add github.com/milo-language/milo-sdl@v0.3.1     # or pin a tag
+milo pkg add github.com/milo-language/milo-sdl            # latest release
+milo pkg add github.com/milo-language/milo-sdl@v0.3.1     # or pin a tag
 ```
 
 | Import | Contents |
